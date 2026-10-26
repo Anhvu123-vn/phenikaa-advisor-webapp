@@ -1,0 +1,279 @@
+--- crawler_with_login.orig.py	2026-10-13 10:34:39.222217496 +0000
++++ proj/phenikaa_gpa_planner/crawler_with_login.py	2026-10-13 10:34:39.310078218 +0000
+@@ -419,17 +419,17 @@
+         return False
+ 
+ 
+-def dismiss_stay_signed_in(page) -> bool:
+-    """Chỉ bấm ``No`` khi CHẮC CHẮN đang ở màn Microsoft KMSI.
++def accept_stay_signed_in(page) -> bool:
++    """Tự bấm ``Có`` (Yes) ở màn Microsoft "Duy trì đăng nhập?" (KMSI).
+ 
+-    ``#idBtn_Back`` KHÔNG phải selector riêng của màn "Stay signed in?";
+-    Microsoft dùng id này cho nút Back/No ở nhiều bước đăng nhập khác nhau.
+-    Bản cũ chỉ cần thấy ``#idBtn_Back`` là bấm nên đôi lúc vô tình bấm Back
+-    ngay sau khi người dùng xác thực, khiến SSO quay lại ``login.aspx`` và
+-    crawler cứ chờ mãi.
+-
+-    ``#KmsiDescription`` là marker riêng của màn KMSI nên phải thấy marker
+-    này (hoặc tiêu đề KMSI rõ ràng) trước khi bấm.
++    Bấm "Có" để Microsoft nhớ phiên -> những lần crawl sau trong cùng profile
++    Chrome không phải đăng nhập lại. Đồng thời tick "Không hiển thị lại thông
++    báo này" (nếu có) để màn này không hiện nữa.
++
++    Chỉ bấm khi CHẮC CHẮN đang ở màn KMSI (marker ``#KmsiDescription`` hoặc
++    tiêu đề KMSI rõ ràng). Nút Yes của Microsoft là ``#idSIButton9`` — id này
++    cũng dùng cho nút "Next/Sign in" ở các bước khác nên TUYỆT ĐỐI không bấm
++    nếu chưa xác nhận đúng màn KMSI.
+     """
+     try:
+         url = (page.url or "").lower()
+@@ -461,15 +461,52 @@
+         if not is_kmsi:
+             return False
+ 
+-        no_btn = page.query_selector("#idBtn_Back")
+-        if no_btn and no_btn.is_visible():
+-            no_btn.click()
++        # Tick "Không hiển thị lại thông báo này" (Don't show this again).
++        try:
++            cb = page.query_selector("#KmsiCheckboxField")
++            if cb and cb.is_visible() and not cb.is_checked():
++                cb.check(timeout=1500)
++        except Exception:
++            pass
++
++        # Nút "Có" / "Yes".
++        yes_btn = page.query_selector("#idSIButton9")
++        if yes_btn and yes_btn.is_visible():
++            yes_btn.click()
+             return True
++
++        # Fallback theo nhãn nút nếu id đổi.
++        for label in ("Có", "Yes"):
++            try:
++                btn = page.get_by_role("button", name=label, exact=True).first
++                if btn and btn.is_visible():
++                    btn.click()
++                    return True
++            except Exception:
++                continue
+     except Exception:
+         pass
+     return False
+ 
+ 
++# Giữ tên cũ để code/test nào còn gọi vẫn chạy (nhưng giờ bấm "Có").
++dismiss_stay_signed_in = accept_stay_signed_in
++
++
++def _handle_kmsi_on_any_page(context, preferred=None):
++    """Tìm màn KMSI trên bất kỳ tab nào của context và bấm Có.
++    Trả về page đã bấm (hoặc None)."""
++    for candidate in _all_live_pages(context, preferred):
++        if accept_stay_signed_in(candidate):
++            emit("login", "info", "Đã tự động bấm 'Có' ở màn 'Duy trì đăng nhập?'.", 30)
++            try:
++                wait_for_stable_content(candidate, timeout_ms=3500)
++            except Exception:
++                pass
++            return candidate
++    return None
++
++
+ def select_chuong_trinh_if_needed(page) -> bool:
+     """
+     Nhiều trang báo cáo (Chương trình học, Điểm...) có dropdown "Chọn chương
+@@ -706,9 +743,9 @@
+         if has_menu(page):
+             emit("login", "ok", "Đăng nhập QLDT thành công!", 35)
+             return True
+-        # Tự bấm "No" nếu Microsoft hiện màn "Stay signed in?" giữa chừng
+-        if dismiss_stay_signed_in(page):
+-            emit("login", "info", "Đã tự động bấm 'No' ở màn 'Stay signed in?'.", 30)
++        # Tự bấm "Có" nếu Microsoft hiện màn "Stay signed in?" giữa chừng
++        if accept_stay_signed_in(page):
++            emit("login", "info", "Đã tự động bấm 'Có' ở màn 'Duy trì đăng nhập?'.", 30)
+             wait_for_stable_content(page, timeout_ms=5000)
+         page.wait_for_timeout(400)
+ 
+@@ -1413,6 +1450,9 @@
+             if has_menu(page):
+                 emit("login", "ok", "Vào menu thành công (đã đăng nhập sẵn)!", 35)
+                 return context, page
++            if accept_stay_signed_in(page):
++                emit("login", "info", "Đã tự động bấm 'Có' ở màn 'Duy trì đăng nhập?'.", 24)
++                wait_for_stable_content(page, timeout_ms=3500)
+             page.wait_for_timeout(300)
+ 
+         # Có thể đang ở portal -> click Cổng Sinh Viên
+@@ -1487,6 +1527,57 @@
+     return f"http://localhost:{port}"
+ 
+ 
++def _acquire_single_cdp_page(context):
++    """Đảm bảo chỉ còn ĐÚNG 1 tab để crawl trong Chrome riêng của Advisor.
++
++    - Ưu tiên tái sử dụng tab QLĐT đang mở (giữ nguyên đăng nhập/trạng thái).
++    - Nếu không có thì dùng tab trống/tab đầu tiên; chỉ new_page() khi Chrome
++      chưa có tab nào.
++    - Đóng các tab QLĐT / tab trống THỪA (Chrome này là profile riêng của
++      Advisor nên đóng tab thừa là an toàn; không đụng tab khác của người dùng).
++    """
++    try:
++        pages = [pg for pg in context.pages if not pg.is_closed()]
++    except Exception:
++        pages = []
++
++    def _url(pg):
++        try:
++            return (pg.url or "").lower()
++        except Exception:
++            return ""
++
++    keep = next((pg for pg in pages if _is_qldt_url(_url(pg))), None)
++    if keep is None:
++        keep = next((pg for pg in pages if _url(pg) in ("", "about:blank", "chrome://newtab/")), None)
++    if keep is None and pages:
++        keep = pages[0]
++    if keep is None:
++        return context.new_page()
++
++    for pg in pages:
++        if pg is keep:
++            continue
++        u = _url(pg)
++        if _is_qldt_url(u) or u in ("", "about:blank", "chrome://newtab/"):
++            try:
++                pg.close()
++            except Exception:
++                pass
++    return keep
++
++
++def _close_cdp_page_safely(context, page):
++    """Crawl xong ở mode CDP: nếu đây là tab DUY NHẤT thì giữ lại (đóng tab cuối
++    sẽ tắt luôn cửa sổ Chrome riêng, lần sau phải mở lại); chỉ đóng khi còn tab khác."""
++    try:
++        others = [pg for pg in context.pages if pg is not page and not pg.is_closed()]
++        if others:
++            page.close()
++    except Exception:
++        pass
++
++
+ def open_with_cdp(p, port: int = CDP_DEFAULT_PORT):
+     """
+     Chế độ CDP: KHÔNG copy profile, KHÔNG mở cửa sổ Chrome mới.
+@@ -1521,7 +1612,10 @@
+                 "--remote-debugging-address=127.0.0.1",
+                 "--no-first-run",
+                 "--no-default-browser-check",
+-                DASHBOARD_URL,
++                # KHÔNG truyền DASHBOARD_URL ở đây: nếu Chrome tự mở 1 tab QLĐT
++                # rồi code lại new_page() thêm 1 tab nữa thì sẽ có 2 tab QLĐT.
++                # Tab duy nhất sẽ được điều hướng bởi _acquire_single_cdp_page().
++                "about:blank",
+             ]
+             creation_flags = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0) if os.name == "nt" else 0
+             subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+@@ -1564,14 +1658,14 @@
+         emit("login", "error", f"Lỗi khi lấy cửa sổ Chrome đang mở: {e}")
+         return False
+ 
+-    emit("login", "info", "Đã gắn vào Chrome đang chạy, đang mở tab mới...", 12)
++    emit("login", "info", "Đã gắn vào Chrome đang chạy, đang dùng lại tab QLĐT (chỉ 1 tab)...", 12)
+     try:
+-        page = context.new_page()
++        page = _acquire_single_cdp_page(context)
+     except Exception as e:
+-        emit("login", "error", f"Không mở được tab mới: {e}")
++        emit("login", "error", f"Không mở được tab: {e}")
+         return False
+ 
+-    emit("login", "running", "Đang mở trang dashboard QLDT trong tab mới...", 20)
++    emit("login", "running", "Đang mở trang dashboard QLDT...", 20)
+     if not ensure_qldt_page(page, prefer_dashboard=True, retries=3):
+         emit(
+             "login", "error",
+@@ -1583,15 +1677,31 @@
+         except Exception:
+             pass
+         return False
+-    emit("login", "info", f"Tab mới đang ở: {page.url}", 22)
++    emit("login", "info", f"Tab QLĐT đang ở: {page.url}", 22)
+ 
+     emit("login", "running", "Đợi QLĐT tải menu. Nếu đây là lần đầu, hãy đăng nhập trong cửa sổ Chrome vừa mở; hệ thống sẽ tiếp tục tự động sau khi đăng nhập...", 25)
+     deadline = time.time() + 180
++    last_portal_click = 0.0
+     while time.time() < deadline:
+-        if has_menu(page):
+-            emit("login", "ok", "Vào menu thành công (tab mới, dùng session Chrome đang mở)!", 35)
+-            return context, page
+-        page.wait_for_timeout(300)
++        # Menu có thể hiện ở bất kỳ tab nào (SSO đôi khi mở popup).
++        authed = _find_authenticated_page(context, page)
++        if authed is not None:
++            emit("login", "ok", "Vào menu thành công (dùng session Chrome riêng của Advisor)!", 35)
++            return context, authed
++        # Tự bấm "Có" ở màn "Duy trì đăng nhập?" sau khi người dùng đăng nhập xong.
++        kmsi_page = _handle_kmsi_on_any_page(context, page)
++        if kmsi_page is not None:
++            page = kmsi_page
++            continue
++        # Màn chọn cổng (Cổng sinh viên / Cổng cán bộ) sau SSO.
++        if time.time() - last_portal_click > 3:
++            last_portal_click = time.time()
++            for cand in _all_live_pages(context, page):
++                if click_congsinhvien(cand):
++                    page = cand
++                    emit("login", "info", "Đã chọn 'Cổng sinh viên'.", 30)
++                    break
++        time.sleep(0.4)
+ 
+     emit("login", "running", "Chưa thấy menu sau khi chờ đăng nhập; thử tìm nút 'Cổng Sinh Viên'...", 27)
+     if click_congsinhvien(page):
+@@ -1737,10 +1847,10 @@
+             # 2) Xử lý KMSI trên bất kỳ tab Microsoft nào đang mở.
+             dismissed = False
+             for candidate in live_pages:
+-                if dismiss_stay_signed_in(candidate):
++                if accept_stay_signed_in(candidate):
+                     dismissed = True
+                     page = candidate
+-                    emit("login", "info", "Đã tự động bấm 'No' ở màn 'Stay signed in?'.", 20)
++                    emit("login", "info", "Đã tự động bấm 'Có' ở màn 'Duy trì đăng nhập?'.", 20)
+                     try:
+                         wait_for_stable_content(candidate, timeout_ms=3500)
+                     except Exception:
+@@ -1773,7 +1883,9 @@
+                     except Exception:
+                         continue
+                 if target is None:
+-                    target = context.new_page()
++                    # Dùng lại tab đang theo dõi thay vì mở thêm tab mới
++                    # (tránh có 2 tab QLĐT cùng lúc).
++                    target = page
+ 
+                 try:
+                     target.goto(DASHBOARD_URL, wait_until="domcontentloaded", timeout=30000)
+@@ -2016,17 +2128,14 @@
+                 # QUAN TRỌNG: context ở mode này LÀ cửa sổ Chrome thật của
+                 # người dùng (gắn qua CDP) — context.close() sẽ đóng luôn
+                 # MỌI tab khác họ đang mở. Chỉ đóng đúng tab vừa dùng để crawl.
+-                try:
+-                    page.close()
+-                except Exception:
+-                    pass
++                _close_cdp_page_safely(context, page)
+             else:
+                 context.close()
+         except Exception as e:
+             emit("crawl", "error", f"Lỗi crawl: {e}")
+             try:
+                 if mode == "cdp":
+-                    page.close()
++                    _close_cdp_page_safely(context, page)
+                 else:
+                     context.close()
+             except Exception:

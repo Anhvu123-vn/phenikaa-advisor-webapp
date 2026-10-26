@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.git/
+.env
+.phenikaa_secret_key
+_phenikaa_secret_key
+data/
+capture_all/
+tests/
+*.zip

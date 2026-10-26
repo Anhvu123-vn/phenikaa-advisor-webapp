@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#111D35">
+<title>Phenikaa Advisor — Lộ trình học tập</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app-shell">
+  <aside id="appSidebar" class="sidebar" aria-label="Điều hướng chính">
+    <div class="sidebar-header">
+      <a id="sidebarBrand" class="sidebar-brand" href="#" aria-label="Phenikaa Advisor">
+        <span class="brand-mark">PA</span>
+        <span class="sidebar-brand-copy">
+          <strong>Phenikaa Advisor</strong>
+          <small>Lộ trình học tập</small>
+        </span>
+      </a>
+      <button id="sidebarCollapse" class="sidebar-collapse" type="button" aria-label="Thu gọn thanh bên" title="Thu gọn thanh bên">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <p class="sidebar-section-label">Học tập</p>
+      <a class="sidebar-link active" href="#" data-nav-target="overviewSection">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5V21H3z"/><path d="M9 21v-6h6v6"/></svg>
+        <span class="sidebar-link-text">Tổng quan</span>
+      </a>
+      <a class="sidebar-link" href="#" data-nav-target="progressSection">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/><path d="M7 12h3M14 12h3"/></svg>
+        <span class="sidebar-link-text">Quá trình học tập</span>
+      </a>
+      <a class="sidebar-link" href="#" data-nav-target="supportSection">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M8.5 14.5A7 7 0 1 1 15.5 14.5c-1 .8-1.5 1.5-1.5 2.5h-4c0-1-.5-1.7-1.5-2.5z"/></svg>
+        <span class="sidebar-link-text">Hỗ trợ học tập</span>
+      </a>
+      <a class="sidebar-link" href="#" data-nav-target="assessmentSection">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8M9 3h6v3H9z"/><path d="M6 5H4v16h16V5h-2"/><path d="m8 13 2.5 2.5L16 10"/></svg>
+        <span class="sidebar-link-text">Đánh giá tiến độ</span>
+      </a>
+      <a class="sidebar-link" href="#" data-nav-target="graduationSection">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5z"/><path d="M6 10.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-5.5"/><path d="M22 8v6"/></svg>
+        <span class="sidebar-link-text">Điều kiện tốt nghiệp</span>
+      </a>
+      <a class="sidebar-link" href="#" data-nav-target="scheduleSection">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+        <span class="sidebar-link-text">Lịch học</span>
+      </a>
+      <a class="sidebar-link" href="#" data-nav-target="coursesSection">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 1 4 17.5z"/><path d="M4 17.5A2.5 2.5 0 0 1 6.5 15H20"/></svg>
+        <span class="sidebar-link-text">Môn học</span>
+      </a>
+      <a class="sidebar-link" href="#" data-nav-target="syncSection">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6v5h-5"/><path d="M4 18v-5h5"/><path d="M6.1 9A7 7 0 0 1 18.5 6.5L20 11"/><path d="M17.9 15A7 7 0 0 1 5.5 17.5L4 13"/></svg>
+        <span class="sidebar-link-text">Cập nhật dữ liệu QLĐT</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <p class="sidebar-privacy sidebar-link-text">Đăng nhập trực tiếp QLDT · Advisor không lưu mật khẩu.</p>
+    </div>
+  </aside>
+
+  <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+
+  <section id="dashboard" class="dashboard main-shell">
+    <header class="topbar">
+      <div class="topbar-title-wrap">
+        <button id="mobileMenuBtn" class="mobile-menu-btn" type="button" aria-label="Mở menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+        <div>
+          <h1 id="topbarTitle">Tổng quan</h1>
+          <p id="topbarSubtitle">Theo dõi tiến độ và kế hoạch học tập</p>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <span id="syncState" class="sync-state">Dữ liệu từ lần crawl gần nhất</span>
+      </div>
+    </header>
+
+    <main class="content">
+      <div id="emptyState" class="welcome-hero hidden">
+        <span class="welcome-eyebrow">PHENIKAA ADVISOR</span>
+        <h2>Kiểm tra lộ trình học tập của bạn</h2>
+        <p>Crawl dữ liệu từ Cổng sinh viên để xem GPA, môn cần học và gợi ý đăng ký kỳ tới.</p>
+        <button id="btnCrawlHero" class="btn-accent btn-large">Crawl dữ liệu lần đầu</button>
+        <div class="welcome-security">
+          <span class="welcome-security-icon">✓</span>
+          <span>Bạn tự đăng nhập QLDT trong phiên Chrome riêng. Advisor không có form đăng nhập và không lưu mật khẩu QLDT.</span>
+        </div>
+      </div>
+
+      <div id="dataWrap" class="hidden">
+        <section id="overviewSection" class="view-section active-view">
+          <div class="overview-stat-grid">
+            <article class="stat-card stat-card-primary">
+              <span class="stat-label">Tín chỉ tích lũy</span>
+              <strong id="statCredits" class="stat-value">—</strong>
+              <span id="statCreditsRemain" class="stat-help">—</span>
+            </article>
+            <article class="stat-card">
+              <span class="stat-label">GPA hệ 4</span>
+              <strong id="statGpa4" class="stat-value">—</strong>
+              <span id="statGpa10" class="stat-help">Hệ 10: —</span>
+            </article>
+            <article class="stat-card">
+              <span class="stat-label">Đã hoàn thành</span>
+              <strong id="statCompleted" class="stat-value">—</strong>
+              <span class="stat-help">học phần</span>
+            </article>
+            <article class="stat-card">
+              <span class="stat-label">Có thể đăng ký</span>
+              <strong id="statEligible" class="stat-value">—</strong>
+              <span class="stat-help">đủ điều kiện</span>
+            </article>
+          </div>
+
+          <section id="retakeCard" class="overview-card retake-card hidden">
+            <div class="overview-card-head">
+              <div>
+                <h2>Số tín chỉ đã trượt</h2>
+              </div>
+            </div>
+            <div class="overall-progress-row">
+              <div class="overall-progress-track"><div id="retakeFill" class="overall-progress-fill"></div></div>
+              <strong id="retakeText" class="mono">—</strong>
+            </div>
+            <p id="retakeNote" class="muted-copy"></p>
+          </section>
+
+          <div class="overview-grid">
+            <section class="overview-card">
+              <div class="overview-card-head">
+                <div>
+                  <span class="section-kicker">TOÀN KHÓA</span>
+                  <h2>Còn bao nhiêu để hoàn thành</h2>
+                </div>
+              </div>
+              <div class="overall-progress-row">
+                <div class="overall-progress-track"><div id="overallProgressFill" class="overall-progress-fill"></div></div>
+                <strong id="overallProgressText" class="mono">—</strong>
+              </div>
+              <div id="overviewPendingGroups" class="overview-pending-groups"></div>
+            </section>
+
+            <section class="overview-card">
+              <div class="overview-card-head">
+                <div>
+                  <span class="section-kicker">HỌC KỲ HIỆN TẠI</span>
+                  <h2>Môn đang học</h2>
+                </div>
+                <button class="text-action" type="button" data-go-courses="DANG_KY_KY_NAY">Xem môn →</button>
+              </div>
+              <div class="current-semester-metric">
+                <strong id="currentSemesterCount">—</strong>
+                <span>môn</span>
+                <i></i>
+                <strong id="currentSemesterCredits">—</strong>
+                <span>tín chỉ</span>
+              </div>
+              <p id="currentSemesterNote" class="muted-copy"></p>
+            </section>
+          </div>
+        </section>
+
+        <section id="progressSection" class="view-section">
+          <section id="progressCard" class="overview-card progress-card" aria-labelledby="progressTitle">
+            <div class="overview-card-head">
+              <div>
+                <span class="section-kicker">TIẾN TRÌNH HIỆN TẠI</span>
+                <h2 id="progressTitle">Các kỳ đã học</h2>
+              </div>
+              <span id="progressSummary" class="pg-summary"></span>
+            </div>
+            <div id="progressGrid" class="pg-grid"></div>
+            <div id="progressDetail" class="pg-detail hidden" aria-live="polite"></div>
+          </section>
+        </section>
+
+        <section id="assessmentSection" class="view-section">
+          <div class="gx">
+            <div class="gx-bar"><button id="refreshAssessment" class="text-action" type="button">Phân tích lại</button></div>
+            <div id="assessmentSummary"></div>
+            <div id="assessmentContent" class="gx"></div>
+          </div>
+        </section>
+
+        <section id="supportSection" class="view-section">
+          <div class="wz">
+
+            <!-- Bước 1: chọn mục tiêu bằng thanh kéo hoặc xếp loại -->
+            <section class="wz-goal" id="stepTarget">
+              <h2 class="wz-title">Bạn muốn tốt nghiệp loại nào?</h2>
+              <div class="wz-picks" id="goalRanks">
+                <button type="button" class="wz-pick" data-rank="kha"><strong>Khá</strong><span>GPA từ 2.50</span></button>
+                <button type="button" class="wz-pick" data-rank="gioi"><strong>Giỏi</strong><span>GPA từ 3.20</span></button>
+                <button type="button" class="wz-pick" data-rank="xuat_sac"><strong>Xuất sắc</strong><span>GPA từ 3.60</span></button>
+              </div>
+              <p id="goalHint" class="wz-hint">Chọn một loại để xem bạn có đạt được không và cần khoảng bao nhiêu kỳ nữa.</p>
+            </section>
+
+            <div id="supportBody" class="hidden">
+
+              <div id="wzTop" class="wz-top hidden"></div>
+
+              <!-- Màn 2: kết luận -->
+              <section id="wzResult" class="wz-pane">
+                <div id="wzVerdict"></div>
+                <details class="wz-details" hidden>
+                  <summary>Xem chi tiết</summary>
+                  <dl id="wzDetails" class="wz-dl"></dl>
+                  <div id="analysisWarnings" class="wz-warnings hidden"></div>
+                </details>
+              </section>
+
+              <!-- Màn 3: môn nên học lại -->
+              <section id="wzImprove" class="wz-pane hidden">
+                <button type="button" class="wz-back" data-wz-go="result">‹ Quay lại</button>
+                <div id="wzImproveBody"></div>
+              </section>
+
+              <!-- Màn 4: môn học kỳ tới -->
+              <section id="wzNext" class="wz-pane hidden">
+                <button type="button" class="wz-back" data-wz-back-from-next>‹ Quay lại</button>
+                <h2 class="wz-h">Môn nên học kỳ tới</h2>
+                <div class="wz-field">
+                  <span class="wz-label">Bạn muốn học bao nhiêu tín chỉ?</span>
+                  <div class="wz-opts" id="paceOpts">
+                    <button type="button" class="wz-opt" data-pace="moderate">8–10</button>
+                    <button type="button" class="wz-opt" data-pace="heavy">11–13</button>
+                    <button type="button" class="wz-opt" data-pace="fast">14–16</button>
+                  </div>
+                </div>
+                <div id="wzNextBody"></div>
+              </section>
+
+              <!-- Màn 5: lộ trình -->
+              <section id="wzRoadmap" class="wz-pane hidden">
+                <button type="button" class="wz-back" data-wz-go="next">‹ Quay lại</button>
+                <div id="wzRoadmapBody"></div>
+              </section>
+
+            </div>
+          </div>
+        </section>
+
+<section id="scheduleSection" class="view-section">
+          <div class="page-intro">
+            <div>
+              <span class="section-kicker">LỊCH HỌC</span>
+              <h2>Lịch học theo tuần</h2>
+              <p>Lấy từ mục Tra cứu kết quả đăng ký. Mỗi khối là một buổi học, đánh số theo tiết.</p>
+            </div>
+            <button id="schRefresh" class="text-action" type="button">Làm mới</button>
+          </div>
+          <div id="schMessage" class="sch-message hidden" role="status"></div>
+          <section id="schBoard" class="panel sch-panel hidden">
+            <div class="sch-toolbar">
+              <div class="sch-nav">
+                <button id="schPrev" class="sch-btn" type="button" aria-label="Tuần trước">‹</button>
+                <button id="schToday" class="sch-btn sch-btn-text" type="button">Tuần này</button>
+                <button id="schNext" class="sch-btn" type="button" aria-label="Tuần sau">›</button>
+                <button id="schSubscribe" class="sch-btn sch-btn-text" type="button" title="Thêm vào app Lịch (iPhone / Google / Outlook) — tự cập nhật, không cần tải file">Thêm vào lịch</button>
+                <a id="schExport" class="sch-btn sch-btn-text" href="/api/class-schedule.ics" download="lich_hoc_phenikaa.ics" title="Tải file .ics để import một lần">Tải .ics</a>
+              </div>
+              <div class="sch-week">
+                <strong id="schWeekLabel"></strong>
+                <span id="schWeekMeta"></span>
+              </div>
+            </div>
+            <p id="schNextClass" class="sch-next hidden"></p>
+            <div class="table-scroll"><div id="schGrid" class="sch-grid"></div></div>
+            <div id="schLegend" class="sch-legend"></div>
+          </section>
+          <dialog id="schAttDialog" class="sch-att-dialog" aria-labelledby="schAttTitle"></dialog>
+        </section>
+
+        <section id="coursesSection" class="view-section">
+          <div class="page-intro courses-page-intro">
+            <div>
+              <span class="section-kicker">HỌC PHẦN</span>
+              <h2>Danh sách môn học</h2>
+              <p>Lọc theo nhóm hoặc gõ vào ô tìm kiếm để tra cứu mọi môn.</p>
+            </div>
+            <label class="course-search-wrap">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+              <input id="courseSearch" type="search" placeholder="Tìm môn theo tên..." autocomplete="off">
+            </label>
+          </div>
+          <section class="panel courses-panel">
+            <div class="filter-tabs" id="filterTabs">
+              <button class="filter-tab active" data-status="DANG_KY_KY_NAY">Đang học</button>
+              <button class="filter-tab" data-status="CO_THE_DANG_KY">Có thể đăng ký</button>
+              <button class="filter-tab" data-status="CAN_HOC_LAI">Học lại</button>
+              <button class="filter-tab" data-status="CHUONG_TRINH">Chương trình học</button>
+            </div>
+            <div id="coursesResultMeta" class="courses-result-meta"></div>
+            <div id="coursesTableWrap" class="table-scroll"></div>
+          </section>
+        </section>
+
+        <section id="simulatorSection" class="view-section hidden">
+          <div class="page-intro simulator-intro">
+            <div>
+              <span class="section-kicker">ACADEMIC SIMULATOR</span>
+              <h2>Mô phỏng lộ trình tốt nghiệp</h2>
+              <p>Chọn môn cho từng học kỳ. Tổng tín chỉ tự cập nhật; hệ thống kiểm tra điều kiện tiên quyết khi lưu.</p>
+            </div>
+          </div>
+          <section class="overview-card simulator-card simulator-minimal-card">
+            <div id="simSemesters" class="sim-semesters"></div>
+            <div class="simulator-bottom-bar">
+              <div id="simPlanStatus" class="sim-plan-status">Mỗi học kỳ từ 8 đến 16 tín chỉ (mức tối thiểu không áp dụng khi tổng tín chỉ còn lại ít hơn 8).</div>
+              <div class="simulator-actions">
+                <button id="simAddSemester" class="btn-ghost" type="button">+ Thêm học kỳ</button>
+                <button id="simSave" class="btn-primary" type="button">Lưu kế hoạch</button>
+              </div>
+            </div>
+            <div id="simResults" class="sim-results" aria-live="polite"></div>
+          </section>
+          <details class="overview-card simulator-saved-card sim-saved-details">
+            <summary><strong>Kế hoạch đã lưu</strong></summary>
+            <div class="overview-card-head"><div></div><div class="simulator-actions"><button id="simCompare" class="btn-primary" type="button">So sánh đã chọn</button><button id="simReload" class="text-action" type="button">Làm mới</button></div></div>
+            <div id="simCompareResults" class="sim-results" aria-live="polite"></div>
+            <div id="simSavedPlans" class="sim-saved-plans"><p class="muted-copy">Đang tải kế hoạch…</p></div>
+          </details>
+        </section>
+
+        <section id="graduationSection" class="view-section">
+          <div class="gx">
+            <div class="gx-bar"><button id="gradRefresh" class="text-action" type="button">Làm mới</button></div>
+            <section id="gradVerdict" class="gx-verdict" aria-live="polite"></section>
+            <section class="gx-card">
+              <p class="gx-kicker">Việc cần làm</p>
+              <div id="gradTodo"></div>
+            </section>
+            <section id="gradDoneCard" class="gx-card hidden">
+              <button id="gradDoneToggle" class="gx-done-head" type="button" aria-expanded="false">
+                <span class="gx-done-title">Đã đạt</span>
+                <span id="gradDoneCount" class="gx-muted"></span>
+                <span class="gx-chev" aria-hidden="true">⌄</span>
+              </button>
+              <div id="gradDoneList" class="gx-done-list hidden"></div>
+            </section>
+            <p id="gradFooter" class="gx-footer"></p>
+            <p id="gradDisclaimer" class="gx-note"></p>
+          </div>
+        </section>
+
+        <section id="syncSection" class="view-section">
+          <div class="page-intro">
+            <div>
+              <span class="section-kicker">DỮ LIỆU</span>
+              <h2>Cập nhật dữ liệu QLĐT</h2>
+              <p>Đồng bộ điểm số, chương trình đào tạo và dữ liệu sinh viên từ Cổng sinh viên.</p>
+            </div>
+          </div>
+          <section class="step-card sync-card">
+            <div class="sync-row">
+              <div>
+                <span class="stat-label">Lần cập nhật gần nhất</span>
+                <strong id="syncLastUpdated" class="sync-time">—</strong>
+              </div>
+              <button id="btnCrawl" class="btn-accent btn-large" type="button">Cập nhật dữ liệu từ QLĐT</button>
+            </div>
+            <ul class="sync-list">
+              <li><strong>Điểm số</strong><span>Điểm từng học phần, GPA và số tín chỉ đã tích lũy.</span></li>
+              <li><strong>Chương trình đào tạo</strong><span>Khối kiến thức, môn tiên quyết, tín chỉ bắt buộc/tự chọn.</span></li>
+              <li><strong>Dữ liệu sinh viên</strong><span>Môn đang học kỳ này và các môn đã đăng ký.</span></li>
+            </ul>
+            <p class="sync-note">Bạn nhập mã sinh viên và mật khẩu để Advisor tự đăng nhập qua Microsoft (hoặc bỏ qua để tự đăng nhập trong Chrome); mật khẩu không được lưu. Mục tiêu, môn cải thiện và kế hoạch bạn đã chọn được giữ lại sau khi cập nhật.</p>
+          </section>
+        </section>
+      </div>
+    </main>
+  </section>
+</div>
+
+<div id="crawlModal" class="modal-overlay hidden">
+  <div id="crawlModalCard" class="modal">
+    <div class="modal-header">
+      <div>
+        <h3>Đăng nhập QLDT Phenikaa</h3>
+        <p id="crawlModalSubtitle" class="modal-subtitle">Đang chuẩn bị phiên đăng nhập...</p>
+      </div>
+      <button id="crawlModalClose" class="modal-close" aria-label="Đóng">&times;</button>
+    </div>
+    <div id="crawlModeChoice" class="crawl-mode-choice hidden"></div>
+    <form id="crawlCredForm" class="crawl-cred-form hidden" autocomplete="on">
+      <p class="modal-note">Nhập tài khoản Cổng sinh viên, Advisor sẽ tự đăng nhập qua Microsoft giúp bạn.</p>
+      <label class="cred-label" for="credMssv">Mã sinh viên</label>
+      <div class="cred-input-group">
+        <input id="credMssv" name="username" type="text" inputmode="text" autocomplete="username"
+               autocapitalize="off" spellcheck="false" maxlength="32" placeholder="Ví dụ: 21010001" required>
+        <span class="cred-suffix">@st.phenikaa-uni.edu.vn</span>
+      </div>
+      <label class="cred-label" for="credPassword">Mật khẩu</label>
+      <input id="credPassword" name="password" type="password" autocomplete="current-password"
+             maxlength="256" placeholder="Mật khẩu tài khoản Phenikaa" required>
+      <p id="credError" class="cred-error hidden" role="alert"></p>
+      <div class="cred-actions">
+        <button id="btnCredSubmit" type="submit" class="btn-accent">Đăng nhập &amp; cập nhật</button>
+        <button id="btnCredSkip" type="button" class="btn-link">Bỏ qua, tự đăng nhập</button>
+      </div>
+      <p class="cred-note">Mật khẩu chỉ dùng một lần để đăng nhập, không được lưu và không ghi vào nhật ký. Nếu Microsoft yêu cầu xác thực 2 bước, bạn tự hoàn tất trong cửa sổ Chrome.</p>
+    </form>
+    <div id="crawlProgress" class="crawl-progress">
+      <!-- Giữ element để JS không lỗi, ẩn hoàn toàn -->
+      <p id="crawlInstruction" class="sr-only" aria-live="polite">Đang chuẩn bị Chrome để bạn đăng nhập QLDT.</p>
+      <pre id="crawlLog" class="sr-only" aria-hidden="true"></pre>
+
+      <div id="remoteBrowserWrap" class="remote-browser-wrap hidden">
+        <div class="remote-browser-toolbar">
+          <span><span class="remote-live-dot"></span> Chrome trên VPS</span>
+          <span class="remote-browser-hint">Bấm vào màn hình rồi nhập tài khoản QLDT</span>
+        </div>
+        <iframe id="remoteBrowserFrame" class="remote-browser-frame" title="Chrome QLDT trên VPS" allow="clipboard-read; clipboard-write"></iframe>
+      </div>
+
+      <!-- Loader animation only -->
+      <div class="crawl-loader" aria-hidden="true">
+        <div class="crawl-orb">
+          <span class="crawl-ring crawl-ring-1"></span>
+          <span class="crawl-ring crawl-ring-2"></span>
+          <span class="crawl-ring crawl-ring-3"></span>
+          <span class="crawl-core"></span>
+        </div>
+        <div class="crawl-dots">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <div class="crawl-progress-row">
+        <div class="progress-track"><div id="progressFill" class="progress-fill" style="width:0%"></div></div>
+        <span id="progressPercent">0%</span>
+      </div>
+      <button id="btnCloseCrawlDone" class="btn-primary hidden">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script src="polish.js" defer></script>
+</body>
+</html>

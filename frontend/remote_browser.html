@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QLDT Remote Browser</title>
+  <style>
+    html, body { width:100%; height:100%; margin:0; overflow:hidden; background:#0b1020; font-family:Arial,sans-serif; }
+    #screen { width:100%; height:100%; background:#111827; }
+    #status {
+      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+      color:#dbe4f0; background:#0b1020; font-size:14px; z-index:3;
+    }
+    #status.hidden { display:none; }
+    #status.error { color:#fecaca; }
+  </style>
+</head>
+<body>
+  <div id="screen"></div>
+  <div id="status">Đang kết nối tới Chrome trên VPS...</div>
+
+  <script type="module">
+    import RFB from '/novnc/core/rfb.js';
+
+    const params = new URLSearchParams(location.search);
+    const jobId = params.get('job');
+    const screen = document.getElementById('screen');
+    const statusEl = document.getElementById('status');
+    let rfb = null;
+    let retries = 0;
+    let closedByPage = false;
+
+    function showStatus(text, isError = false) {
+      statusEl.textContent = text;
+      statusEl.classList.remove('hidden');
+      statusEl.classList.toggle('error', isError);
+    }
+
+    function connect() {
+      if (!jobId) {
+        showStatus('Thiếu mã phiên Chrome.', true);
+        return;
+      }
+
+      const scheme = location.protocol === 'https:' ? 'wss' : 'ws';
+      const url = `${scheme}://${location.host}/ws/vnc/${encodeURIComponent(jobId)}`;
+      showStatus('Đang kết nối tới Chrome trên VPS...');
+
+      try {
+        rfb = new RFB(screen, url, { shared: true });
+        rfb.scaleViewport = true;
+        rfb.resizeSession = false;
+        rfb.clipViewport = false;
+        rfb.focusOnClick = true;
+        rfb.viewOnly = false;
+
+        rfb.addEventListener('connect', () => {
+          retries = 0;
+          statusEl.classList.add('hidden');
+          try { rfb.focus(); } catch (_) {}
+        });
+
+        rfb.addEventListener('disconnect', (event) => {
+          if (closedByPage) return;
+          if (event.detail?.clean) {
+            showStatus('Phiên Chrome đã kết thúc.');
+            return;
+          }
+          if (retries < 12) {
+            retries += 1;
+            showStatus(`Mất kết nối, đang thử lại (${retries}/12)...`);
+            setTimeout(connect, 900);
+          } else {
+            showStatus('Không kết nối được tới phiên Chrome. Hãy đóng và bấm Crawl lại.', true);
+          }
+        });
+      } catch (err) {
+        if (retries < 12) {
+          retries += 1;
+          setTimeout(connect, 900);
+        } else {
+          showStatus(`Không mở được remote browser: ${err.message}`, true);
+        }
+      }
+    }
+
+    window.addEventListener('beforeunload', () => {
+      closedByPage = true;
+      try { rfb?.disconnect(); } catch (_) {}
+    });
+
+    connect();
+  </script>
+</body>
+</html>

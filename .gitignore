@@ -1,0 +1,16 @@
+# Bí mật - TUYỆT ĐỐI không commit
+.env
+.phenikaa_secret_key
+_phenikaa_secret_key
+
+# Dữ liệu sinh viên (bảng điểm) và file sinh ra khi chạy
+data/
+capture_all/
+roadmap.json
+*.zip
+
+__pycache__/
+*.pyc
+.pytest_cache/
+# Chrome profile dedicated to Advisor CDP (contains QLDT session cookies)
+.qldt_chrome_profile/
